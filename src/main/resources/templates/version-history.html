@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title th:text="'Version History - ' + ${api.name}">Version History</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 th:text="'Version History - ' + ${api.name}">Version History</h2>
+            <a th:href="@{/api/{id}(id=${api.id})}" class="btn btn-secondary">Back to API</a>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div th:if="${#lists.isEmpty(versions)}" class="text-center py-4">
+                            <p class="text-muted">No version history available.</p>
+                        </div>
+
+                        <div th:unless="${#lists.isEmpty(versions)}">
+                            <div th:each="version : ${versions}" class="border-bottom pb-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h5 class="mb-1">
+                                            Version <span th:text="${version.versionNumber}">1.0.0</span>
+                                            <span th:if="${version.isCurrent}" class="badge bg-success ms-2">Current</span>
+                                        </h5>
+                                        <p class="text-muted mb-2" th:text="${#temporals.format(version.createdDate, 'MMM dd, yyyy HH:mm')}">Date</p>
+                                        <p th:if="${version.changeSummary}" th:text="${version.changeSummary}" class="mb-0">Changes</p>
+                                    </div>
+                                    <div>
+                                        <a th:href="@{/api/{id}/version/{versionId}(id=${api.id}, versionId=${version.id})}"
+                                           class="btn btn-sm btn-outline-primary">View</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html th:replace="~{layout :: layout(~{::main})}" xmlns:th="http://www.thymeleaf.org">
+<main>
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-edit me-2"></i>Edit API Documentation</h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- Display any flash messages -->
+                        <div th:if="${error}" class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <span th:text="${error}"></span>
+                        </div>
+
+                        <div th:if="${success}" class="alert alert-success" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <span th:text="${success}"></span>
+                        </div>
+
+                        <!-- Tabs for different edit options -->
+                        <ul class="nav nav-tabs mb-4" id="editTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="file-tab" data-bs-toggle="tab"
+                                        data-bs-target="#file" type="button" role="tab">
+                                    <i class="fas fa-file-upload me-1"></i>File Re-upload
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="url-tab" data-bs-toggle="tab"
+                                        data-bs-target="#url" type="button" role="tab">
+                                    <i class="fas fa-link me-1"></i>URL Re-upload
+                                </button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content" id="editTabContent">
+                            <!-- File Re-Upload Tab by Default -->
+                            <div class="tab-pane fade show active" id="file" role="tabpanel" th:if="${api.sourceType.name() == 'FILE_UPLOAD'}">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Note:</strong> Re-uploading a file will replace the current API documentation content.
+                                    Make sure the new file contains the updated API specification.
+                                </div>
+
+                                <form th:action="@{/apis/edit/{id}/file(id=${api.id})}" method="post"
+                                      enctype="multipart/form-data" id="fileUploadForm">
+
+                                    <!-- CSRF Protection -->
+                                    <input th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" type="hidden"/>
+                                    <!-- Add hidden ID field -->
+                                    <input type="hidden" name="id" th:value="${api.id}"/>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="fileName" class="form-label">API Name *</label>
+                                                <input type="text" class="form-control" id="fileName" name="name"
+                                                       th:value="${api.name}" required minlength="2" maxlength="100">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="fileVersion" class="form-label">Version *</label>
+                                                <input type="text" class="form-control" id="fileVersion" name="version"
+                                                       th:value="${api.version}" readonly>
+                                                <small class="form-text text-muted">Version will be taken from specification automatically</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="fileDescription" class="form-label">Description</label>
+                                        <textarea class="form-control" id="fileDescription" name="description"
+                                                  rows="3" maxlength="500" th:text="${api.description}"></textarea>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="file" class="form-label">Select New API File *</label>
+                                        <input type="file" class="form-control" id="file" name="file"
+                                               accept=".json,.yaml,.yml" required>
+                                        <small class="form-text text-muted">
+                                            Supported formats: JSON, YAML (.json, .yaml, .yml)
+                                        </small>
+                                        <div class="invalid-feedback" id="fileError" style="display: none;">
+                                            Please select a valid API specification file.
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Created By</label>
+                                            <input type="text" class="form-control"
+                                                   th:value="${api.createdBy}" readonly>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Created At</label>
+                                            <input type="text" class="form-control"
+                                                   th:value="${api.updatedAt != null ? #temporals.format(api.updatedAt, 'MMM dd, yyyy HH:mm') : #temporals.format(api.createdAt, 'MMM dd, yyyy HH:mm')}" readonly>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label">Updated By</label>
+                                                <input type="text" class="form-control" id="fileUpdatedByBy" name="updatedBy">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary" id="updateFileBtn">
+                                            <i class="fas fa-upload me-1"></i>Update with New File
+                                        </button>
+                                        <a th:href="@{/apis/{id}(id=${api.id})}" class="btn btn-secondary">
+                                            <i class="fas fa-times me-1"></i>Cancel
+                                        </a>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- URL Re-Upload Tab -->
+                            <div class="tab-pane fade" id="url" role="tabpanel" th:if="${api.sourceType.name() == 'EXTERNAL_URL'}">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Note:</strong> Updating the URL will fetch the latest API documentation from the new source.
+                                </div>
+
+                                <form th:action="@{/apis/edit/{id}/refresh-url(id=${api.id})}" method="post" id="urlUpdateForm">
+
+                                    <!-- CSRF Protection -->
+                                    <input th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" type="hidden"/>
+                                    <!-- Add hidden ID field -->
+                                    <input type="hidden" name="id" th:value="${api.id}"/>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="urlName" class="form-label">API Name *</label>
+                                                <input type="text" class="form-control" id="urlName" name="name"
+                                                       th:value="${api.name}" required minlength="2" maxlength="100">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="urlVersion" class="form-label">Version *</label>
+                                                <input type="text" class="form-control" id="urlVersion" name="version"
+                                                       th:value="${api.version}" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="urlDescription" class="form-label">Description</label>
+                                        <textarea class="form-control" id="urlDescription" name="description"
+                                                  rows="3" maxlength="500" th:text="${api.description}"></textarea>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="sourceUrl" class="form-label">Swagger/OpenAPI URL *</label>
+                                        <input type="url" class="form-control" id="sourceUrl" name="url"
+                                               th:value="${api.sourceUrl}" required>
+                                        <small class="form-text text-muted">
+                                            URL to the API specification (JSON, YAML)
+                                        </small>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Created By</label>
+                                            <input type="text" class="form-control"
+                                                   th:value="${api.createdBy}" readonly>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Last Updated</label>
+                                            <input type="text" class="form-control"
+                                                   th:value="${api.updatedAt != null ? #temporals.format(api.updatedAt, 'MMM dd, yyyy HH:mm') : #temporals.format(api.createdAt, 'MMM dd, yyyy HH:mm')}" readonly>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label">Updated By</label>
+                                                <input type="text" class="form-control" id="urlUpdatedByBy" name="updatedBy">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary" id="updateUrlBtn">
+                                            <i class="fas fa-sync-alt me-1"></i>Update & Refresh from URL
+                                        </button>
+                                        <a th:href="@{/api/{id}(id=${api.id})}" class="btn btn-secondary">
+                                            <i class="fas fa-times me-1"></i>Cancel
+                                        </a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <hr class="mt-4">
+                        <div class="d-flex justify-content-between">
+                            <a th:href="@{/}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Back to API List
+                            </a>
+                            <a th:href="@{/api/{id}(id=${api.id})}" class="btn btn-outline-primary">
+                                <i class="fas fa-eye me-1"></i>View API Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced file upload validation
+        document.getElementById('file')?.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const fileError = document.getElementById('fileError');
+
+            if (file) {
+                const allowedTypes = ['application/json', 'text/yaml', 'application/x-yaml', 'text/x-yaml'];
+                const fileName = file.name.toLowerCase();
+                const isValidExtension = fileName.endsWith('.json') || fileName.endsWith('.yaml') || fileName.endsWith('.yml');
+                const maxSize = 5 * 1024 * 1024; // 5MB
+
+                if (!isValidExtension && !allowedTypes.includes(file.type)) {
+                    fileError.textContent = 'Please select a valid API specification file (JSON, YAML, or YML)';
+                    fileError.style.display = 'block';
+                    e.target.value = '';
+                    return;
+                }
+
+                if (file.size > maxSize) {
+                    fileError.textContent = 'File size must be less than 5MB';
+                    fileError.style.display = 'block';
+                    e.target.value = '';
+                    return;
+                }
+
+                fileError.style.display = 'none';
+            }
+        });
+
+        // Form validation and submission handling
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add loading states to buttons
+            const forms = ['fileUploadForm', 'urlUpdateForm'];
+            const buttons = ['updateFileBtn', 'updateUrlBtn'];
+
+            forms.forEach((formId, index) => {
+                const form = document.getElementById(formId);
+                const button = document.getElementById(buttons[index]);
+
+                if (form && button) {
+                    form.addEventListener('submit', function(e) {
+                        // Disable button and show loading state
+                        button.disabled = true;
+                        const originalText = button.innerHTML;
+                        button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Updating...';
+
+                        // Re-enable button after 5 seconds (fallback)
+                        setTimeout(() => {
+                            button.disabled = false;
+                            button.innerHTML = originalText;
+                        }, 5000);
+                    });
+                }
+            });
+
+            // Add Bootstrap validation classes
+            const forms_validate = document.querySelectorAll('form');
+            forms_validate.forEach(form => {
+                form.addEventListener('submit', function(event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                });
+            });
+        });
+    </script>
+</main>
+</html>

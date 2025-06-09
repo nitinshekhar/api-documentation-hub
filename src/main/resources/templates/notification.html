@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html th:replace="~{layout :: layout(~{::main})}" xmlns:th="http://www.thymeleaf.org">
+<main>
+    <!-- Compact Header Section - Similar to Index -->
+    <div class="page-header mb-4">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="mb-0" style="font-size: 1.5rem;">
+                        <i class="fas fa-bell me-2"></i>Notifications
+                    </h1>
+                    <p class="mb-0 mt-1 opacity-75" style="font-size: 0.875rem;">Stay updated with the latest API changes</p>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex gap-2 justify-content-end">
+                        <a href="/apis" class="btn btn-light btn-sm">
+                            <i class="fas fa-tachometer me-2"></i>Back to Dashboard
+                        </a>
+                        <button id="markAllReadBtn" class="btn btn-outline-light btn-sm"
+                                th:if="${notifications.size() > 1}">
+                            <i class="fas fa-check-double me-2"></i>Mark All as Read
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Container -->
+    <div class="container">
+        <!-- Success Alert (hidden by default, shown via JavaScript) -->
+        <div id="successAlert" class="alert alert-success alert-dismissible fade show d-none" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span id="successMessage">Notification marked as read successfully!</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Notifications Count Card -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card bg-primary text-white shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-envelope fa-2x me-3"></i>
+                            <div>
+                                <h5 class="card-title mb-0">Unread Notifications</h5>
+                                <h2 class="mb-0" th:text="${notifications.size()}">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="text-center py-5" th:if="${notifications.empty}">
+            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+            <h3 class="text-muted">No Unread Notifications</h3>
+            <p class="text-muted">You're all caught up! Check back later for new API changes.</p>
+            <a class="btn btn-primary" href="/apis">Back to Dashboard</a>
+        </div>
+
+        <!-- Notifications List -->
+        <div th:if="${!notifications.empty}">
+            <!-- Notification Cards -->
+            <div th:each="notification : ${notifications}"
+                 class="card notification-card mb-3 shadow-sm"
+                 th:id="'notification-' + ${notification.id}">
+                <div class="card-body">
+                    <div class="d-flex align-items-start">
+                        <!-- Notification Icon -->
+                        <div class="me-3">
+                            <div class="d-flex align-items-center justify-content-center bg-primary text-white rounded-circle"
+                                 style="width: 40px; height: 40px;">
+                                <i class="fas fa-code-branch"></i>
+                            </div>
+                        </div>
+
+                        <!-- Notification Content -->
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-1">API Change Notification</h5>
+                                <small class="text-muted" th:text="${#temporals.format(notification.createdDate, 'MMM dd, yyyy HH:mm')}">
+                                    Date
+                                </small>
+                            </div>
+
+                            <div class="d-flex align-items-center mb-2">
+                                <h6 class="text-primary mb-0 me-3" th:text="${notification.changeType}">Change Type</h6>
+                                <span th:if="${notification.oldVersion}" class="badge bg-secondary me-2">
+                                    <i class="fas fa-arrow-right me-1"></i>
+                                    <span th:text="${notification.oldVersion}">v1.0</span> →
+                                    <span th:text="${notification.newVersion}">v1.1</span>
+                                </span>
+                            </div>
+
+                            <p class="card-text text-muted mb-3" th:text="${notification.changeDescription}">
+                                Change description
+                            </p>
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-success btn-sm mark-read-btn"
+                                        th:onclick="'markAsRead(' + ${notification.id} + ')'">
+                                    <i class="fas fa-check me-1"></i>Mark as Read
+                                </button>
+                                <a th:if="${notification.apiDocumentation != null}" th:href="@{'/apis/' + ${notification.apiDocumentation.id}}"
+                                   class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-eye me-1"></i>View API Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Function to mark individual notification as read
+        function markAsRead(notificationId) {
+            fetch(`/notifications/${notificationId}/read`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Remove the notification card with animation
+                    const notificationCard = document.getElementById(`notification-${notificationId}`);
+                    notificationCard.style.transition = 'all 0.5s ease';
+                    notificationCard.style.opacity = '0';
+                    notificationCard.style.transform = 'translateX(100%)';
+
+                    setTimeout(() => {
+                        notificationCard.remove();
+                        updateNotificationCount();
+                        showSuccessAlert('Notification marked as read successfully!');
+
+                        // Check if no notifications left
+                        if (document.querySelectorAll('.notification-card').length === 0) {
+                            location.reload();
+                        }
+                    }, 500);
+                } else {
+                    throw new Error('Failed to mark notification as read');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error marking notification as read. Please try again.');
+            });
+        }
+
+        // Function to mark all notifications as read
+        document.getElementById('markAllReadBtn')?.addEventListener('click', function() {
+            if (confirm('Are you sure you want to mark all notifications as read?')) {
+                const notifications = document.querySelectorAll('.notification-card');
+                const promises = [];
+
+                notifications.forEach(card => {
+                    const notificationId = card.id.replace('notification-', '');
+                    promises.push(
+                        fetch(`/notifications/${notificationId}/read`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
+                        })
+                    );
+                });
+
+                Promise.all(promises)
+                    .then(() => {
+                        showSuccessAlert('All notifications marked as read!');
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error marking notifications as read. Please try again.');
+                    });
+            }
+        });
+
+        // Function to show success alert
+        function showSuccessAlert(message) {
+            const successAlert = document.getElementById('successAlert');
+            const successMessage = document.getElementById('successMessage');
+            successMessage.textContent = message;
+            successAlert.classList.remove('d-none');
+
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                successAlert.classList.add('d-none');
+            }, 3000);
+        }
+
+        // Function to update notification count
+        function updateNotificationCount() {
+            const remainingNotifications = document.querySelectorAll('.notification-card').length;
+            const countElement = document.querySelector('.card-body h2');
+            if (countElement) {
+                countElement.textContent = remainingNotifications;
+            }
+        }
+
+        // Auto-refresh every 30 seconds to check for new notifications
+        setInterval(() => {
+            // Only refresh if we're not in the middle of an action
+            if (!document.querySelector('.notification-card[style*="opacity: 0"]')) {
+                fetch(window.location.href)
+                    .then(response => response.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const newDoc = parser.parseFromString(html, 'text/html');
+                        const newCount = newDoc.querySelector('.card-body h2')?.textContent;
+                        const currentCount = document.querySelector('.card-body h2')?.textContent;
+
+                        if (newCount && currentCount && parseInt(newCount) > parseInt(currentCount)) {
+                            // New notifications available, reload page
+                            location.reload();
+                        }
+                    })
+                    .catch(error => console.log('Auto-refresh error:', error));
+            }
+        }, 30000);
+    </script>
+</main>
+</html>

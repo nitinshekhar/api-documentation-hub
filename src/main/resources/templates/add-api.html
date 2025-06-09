@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::main})}">
+<main>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1><i class="fas fa-plus me-2"></i>Add API Documentation</h1>
+
+            <div class="card">
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="addApiTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="file-tab" data-bs-toggle="tab"
+                                    data-bs-target="#file-pane" type="button" role="tab">
+                                <i class="fas fa-file-upload me-2"></i>Upload File
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="url-tab" data-bs-toggle="tab"
+                                    data-bs-target="#url-pane" type="button" role="tab">
+                                <i class="fas fa-link me-2"></i>From URL
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content mt-3">
+                        <!-- File Upload Tab -->
+                        <div class="tab-pane fade show active" id="file-pane" role="tabpanel">
+                            <form action="/apis/upload-file" method="post" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <label for="fileName" class="form-label">API Name *</label>
+                                    <input type="text" class="form-control" id="fileName" name="name" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="fileDescription" class="form-label">Description</label>
+                                    <textarea class="form-control" id="fileDescription" name="description" rows="3"></textarea>
+                                </div>
+
+                                <div class="row">
+                                    <!--<div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="fileVersion" class="form-label">Version *</label>
+                                            <input type="text" class="form-control" id="fileVersion" name="version"
+                                                   value="1.0.0" required>
+                                        </div>
+                                    </div> -->
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="fileCreatedBy" class="form-label">Created By</label>
+                                            <input type="text" class="form-control" id="fileCreatedBy" name="createdBy">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="file" class="form-label">Swagger/OpenAPI File *</label>
+                                    <input type="file" class="form-control" id="file" name="file"
+                                           accept=".json,.yaml,.yml" required>
+                                    <div class="form-text">Upload JSON or YAML file (max 10MB)</div>
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-upload me-2"></i>Upload API
+                                    </button>
+                                    <a href="/" class="btn btn-secondary">Cancel</a>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- URL Tab -->
+                        <div class="tab-pane fade" id="url-pane" role="tabpanel">
+                            <form action="/apis/upload-url" method="post">
+                                <div class="mb-3">
+                                    <label for="urlName" class="form-label">API Name *</label>
+                                    <input type="text" class="form-control" id="urlName" name="name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="urlDescription" class="form-label">Description</label>
+                                    <textarea class="form-control" id="urlDescription" name="description" rows="3"></textarea>
+                                </div>
+
+                                <div class="row">
+                                    <!--<div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="urlVersion" class="form-label">Version *</label>
+                                            <input type="text" class="form-control" id="urlVersion" name="version"
+                                                   value="1.0.0" required>
+                                        </div>
+                                    </div> -->
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="urlCreatedBy" class="form-label">Created By</label>
+                                            <input type="text" class="form-control" id="urlCreatedBy" name="createdBy">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="url" class="form-label">Swagger/OpenAPI URL *</label>
+                                    <input type="url" class="form-control" id="url" name="url" required
+                                           placeholder="https://api.example.com/swagger.json">
+                                    <div class="form-text">URL to Swagger JSON or YAML file</div>
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-download me-2"></i>Add from URL
+                                    </button>
+                                    <a href="/" class="btn btn-secondary">Cancel</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlForm = document.querySelector('form[action="/apis/upload-url"]');
+            urlForm.addEventListener('submit', function(event) {
+                const urlInput = document.getElementById('url');
+                const url = urlInput.value.trim();
+                if (!url) return; // required field
+
+                // Show loading/disable button if you want
+                // Try to fetch the URL and check if it's JSON or YAML
+                event.preventDefault(); // Stop form for now
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        const contentType = response.headers.get('content-type');
+                        if (contentType && contentType.includes('json')) {
+                            return response.json();
+                        } else {
+                            return response.text(); // Could be YAML, just accept for now
+                        }
+                    })
+                    .then(data => {
+                        // Optionally, check if it's a valid OpenAPI/Swagger object
+                        // For JSON: check for 'openapi' or 'swagger' property
+                        let isValid = false;
+                        if (typeof data === 'object') {
+                            isValid = data.openapi || data.swagger;
+                        } else if (typeof data === 'string') {
+                            isValid = data.includes('openapi:') || data.includes('swagger:');
+                        }
+                        if (!isValid) {
+                            alert('The file does not appear to be a valid OpenAPI/Swagger document.');
+                            return;
+                        }
+                        // If valid, submit the form
+                        urlForm.submit();
+                    })
+                    .catch(error => {
+                        alert('Could not fetch or parse the API documentation from the provided URL.\n' + error);
+                        // Optionally, re-enable button/loading
+                    });
+            });
+        });
+    </script>
+
+</main>
+</html>
