@@ -247,7 +247,7 @@ public class ApiDocumentationService {
         return response.body();
     }
 
-    private String normalizeSwaggerContent(String content) throws IOException {
+    private String normalizeSwaggerContent(String content) {
         try {
             // Try to parse as JSON first
             JsonNode jsonNode = jsonMapper.readTree(content);

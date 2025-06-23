@@ -1,94 +1,97 @@
 <!DOCTYPE html>
 <html th:replace="~{layout :: layout(~{::main})}" xmlns:th="http://www.thymeleaf.org">
 <main>
-    <!-- Compact Header Section -->
-    <div class="page-header mb-4">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-4">
-                    <h1 class="mb-0" style="font-size: 1.5rem;">
-                        <i class="fa fa-tachometer me-2"></i>API Dashboard
-                    </h1>
-                    <p class="mb-0 mt-1 opacity-75" style="font-size: 0.875rem;">Manage and monitor your API documentation</p>
-                </div>
-                <div class="col-md-4">
-                    <!-- Search Section moved to header -->
-                    <form action="/apis" method="get">
-                        <div class="input-group input-group-sm">
-                            <input class="form-control" name="search" placeholder="Search APIs..."
-                                   th:value="${searchTerm}" type="text">
-                            <button class="btn btn-outline-light" type="submit">
-                                <i class="fas fa-search"></i>
-                            </button>
-                            <a class="btn btn-outline-light" href="/apis" th:if="${searchTerm}">
-                                <i class="fas fa-times"></i>
+    <!-- Wrap everything in the api-app namespace -->
+    <div class="api-app">
+        <!-- Compact Header Section -->
+        <div class="page-header mb-4">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-4">
+                        <h1 class="mb-0" style="font-size: 1.5rem;">
+                            <i class="fa fa-tachometer me-2"></i>API Dashboard
+                        </h1>
+                        <p class="mb-0 mt-1 opacity-75" style="font-size: 0.875rem;">Manage and monitor your API documentation</p>
+                    </div>
+                    <div class="col-md-4">
+                        <!-- Search Section moved to header -->
+                        <form action="/apis" method="get">
+                            <div class="input-group input-group-sm">
+                                <input class="form-control" name="search" placeholder="Search APIs..."
+                                       th:value="${searchTerm}" type="text" />
+                                <button class="btn btn-outline-light" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                                <a class="btn btn-outline-light" href="/apis" th:if="${searchTerm}">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a class="btn btn-light btn-sm" href="/add">
+                                <i class="fas fa-plus me-2"></i>Add New API
+                            </a>
+                            <a href="/apis/notifications" class="btn btn-outline-light btn-sm position-relative">
+                                <i class="fas fa-bell me-2"></i>Notifications
                             </a>
                         </div>
-                    </form>
-                </div>
-                <div class="col-md-4">
-                    <div class="d-flex gap-2 justify-content-end">
-                        <a class="btn btn-light btn-sm" href="/add">
-                            <i class="fas fa-plus me-2"></i>Add New API
-                        </a>
-                        <a href="/apis/notifications" class="btn btn-outline-light btn-sm position-relative">
-                            <i class="fas fa-bell me-2"></i>Notifications
-                        </a>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Content Container -->
-    <div class="container">
-        <!-- Empty State -->
-        <div class="text-center py-5" th:if="${#lists.isEmpty(apis)}">
-            <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
-            <h3 class="text-muted">No APIs Found</h3>
-            <p class="text-muted">
-                <span th:if="${searchTerm}">No APIs match your search criteria.</span>
-                <span th:unless="${searchTerm}">Start by adding your first API documentation.</span>
-            </p>
-            <a class="btn btn-primary" href="/add">Add API Documentation</a>
-        </div>
+        <!-- Content Container -->
+        <div class="container">
+            <!-- Empty State -->
+            <div class="empty-state" th:if="${#lists.isEmpty(apis)}">
+                <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                <h3 class="text-muted">No APIs Found</h3>
+                <p class="text-muted">
+                    <span th:if="${searchTerm}">No APIs match your search criteria.</span>
+                    <span th:unless="${searchTerm}">Start by adding your first API documentation.</span>
+                </p>
+                <a class="btn btn-primary" href="/add">Add API Documentation</a>
+            </div>
 
-        <!-- API Cards Grid -->
-        <div class="row">
-            <div class="col-md-6 col-lg-4 mb-4" th:each="api : ${apis}">
-                <div class="card api-card h-100 shadow-sm">
-                    <div class="card-body">
-                        <!-- API Header -->
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-code me-2 text-primary"></i>
-                                <span th:text="${api.name}">API Name</span>
-                            </h5>
+            <!-- API Cards Grid -->
+            <div class="row">
+                <div class="col-md-6 col-lg-4 mb-4" th:each="api : ${apis}">
+                    <div class="card api-card h-100 shadow-sm">
+                        <div class="card-body">
+                            <!-- API Header -->
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-code me-2 text-primary"></i>
+                                    <span th:text="${api.name}">API Name</span>
+                                </h5>
 
-                            <!-- Version Badge -->
-                            <span class="badge bg-primary"
-                                  th:text="'v' + ${api.version}"
-                                  th:title="|Version ${api.version}|"
-                                  th:key="${api.id + '_' + api.version}">v1.0</span>
+                                <!-- Version Badge -->
+                                <span class="badge bg-primary"
+                                      th:text="'v' + ${api.version}"
+                                      th:title="|Version ${api.version}|"
+                                      th:key="${api.id + '_' + api.version}">v1.0</span>
 
-                        </div>
+                            </div>
 
-                        <!-- Description -->
-                        <p class="card-text text-muted small mb-2" th:text="${api.description}">API Description</p>
+                            <!-- Description -->
+                            <p class="card-text text-muted small mb-2" th:text="${api.description}">API Description</p>
 
-                        <!-- Source Type Badge -->
-                        <div class="mb-3">
-                            <span class="badge"
-                                  th:classappend="${api.sourceType.name() == 'FILE_UPLOAD'} ? 'bg-success' : 'bg-info'"
-                                  th:text="${api.sourceType.name() == 'FILE_UPLOAD' ? 'File Upload' : 'External URL'}"
-                                  th:title="${api.sourceType}">Source Type</span>
+                            <!-- Source Type Badge -->
+                            <div class="mb-3">
+                                <span class="badge"
+                                      th:classappend="${api.sourceType.name() == 'FILE_UPLOAD'} ? 'bg-success' : 'bg-info'"
+                                      th:text="${api.sourceType.name() == 'FILE_UPLOAD' ? 'File Upload' : 'External URL'}"
+                                      th:title="${api.sourceType}">Source Type</span>
 
-                            <!-- Show URL indicator for external URLs -->
-                            <span th:if="${api.sourceType.name() == 'EXTERNAL_URL'}"
-                                  class="badge bg-secondary ms-1"
-                                  th:title="${api.sourceUrl}">
-                                <i class="fas fa-external-link-alt"></i>
-                            </span>
+                                <!-- Show URL indicator for external URLs -->
+                                <span th:if="${api.sourceType.name() == 'EXTERNAL_URL'}"
+                                      class="badge bg-secondary ms-1"
+                                      th:title="${api.sourceUrl}">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </span>
+                            </div>
                         </div>
 
                         <!-- Card Actions -->
@@ -120,41 +123,41 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Delete confirmation modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Confirm Delete</h5>
-                    <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Are you sure you want to delete the API documentation for <strong id="deleteApiName"></strong>?
-                    </p>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
-                    <form id="deleteForm" method="post" style="display: inline;" th:action="@{/apis/1}">
-                        <input th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"
-                               type="hidden"/>
-                        <input name="_method" type="hidden" value="delete"/>
-                        <button class="btn btn-danger" type="submit">Delete</button>
-                    </form>
+        <!-- Delete confirmation modal -->
+        <div class="modal fade" id="deleteModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Confirm Delete</h5>
+                        <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to delete the API documentation for <strong id="deleteApiName"></strong>?
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
+                        <form id="deleteForm" method="post" style="display: inline;" th:action="@{/apis/1}">
+                            <input th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"
+                                   type="hidden"/>
+                            <input name="_method" type="hidden" value="delete"/>
+                            <button class="btn btn-danger" type="submit">Delete</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50" style="z-index: 9999;">
-        <div class="d-flex justify-content-center align-items-center h-100">
-            <div class="text-center text-white">
-                <div class="spinner-border mb-3" role="status">
-                    <span class="visually-hidden">Loading...</span>
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50" style="z-index: 9999;">
+            <div class="d-flex justify-content-center align-items-center h-100">
+                <div class="text-center text-white">
+                    <div class="spinner-border mb-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Processing request...</p>
                 </div>
-                <p>Processing request...</p>
             </div>
         </div>
     </div>
@@ -213,7 +216,10 @@
                        <strong>Success!</strong> API has been refreshed successfully.
                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     `;
-                    document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.container').firstChild);
+                    // Insert alert inside the .api-app namespace
+                    const apiApp = document.querySelector('.api-app');
+                    const container = apiApp.querySelector('.container');
+                    container.insertBefore(alertDiv, container.firstChild);
 
                     // Reload page after short delay to show updated data
                     setTimeout(() => {
@@ -229,7 +235,10 @@
                        <strong>Error!</strong> Failed to refresh API: ${error.message}
                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     `;
-                    document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.container').firstChild);
+                    // Insert alert inside the .api-app namespace
+                    const apiApp = document.querySelector('.api-app');
+                    const container = apiApp.querySelector('.container');
+                    container.insertBefore(alertDiv, container.firstChild);
 
                     button.disabled = false;
                     button.innerHTML = originalContent;
@@ -253,7 +262,7 @@
 
         // Auto-dismiss alerts after 5 seconds
         document.addEventListener('DOMContentLoaded', function() {
-            const alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
+            const alerts = document.querySelectorAll('.api-app .alert:not(.alert-permanent)');
             alerts.forEach(alert => {
                 setTimeout(() => {
                     if (alert.parentNode) {
@@ -266,23 +275,23 @@
 
         // Add loading state to form submissions
         document.addEventListener('submit', function(e) {
-            if (e.target.tagName === 'FORM') {
+            if (e.target.tagName === 'FORM' && e.target.closest('.api-app')) {
                 showLoading();
             }
         });
 
-        // Add CSS for better hover effects
+        // Enhanced hover effects - now scoped to .api-app
         document.addEventListener('DOMContentLoaded', function() {
             const style = document.createElement('style');
             style.textContent = `
-               .api-card {
+               .api-app .api-card {
                    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
                }
-               .api-card:hover {
+               .api-app .api-card:hover {
                    transform: translateY(-2px);
                    box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
                }
-               .badge {
+               .api-app .badge {
                    font-size: 0.75em;
                }
                `;

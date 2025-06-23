@@ -4,36 +4,184 @@
     <title th:text="'Version History - ' + ${api.name}">Version History</title>
 </head>
 <body>
-<div th:fragment="content">
+<div th:fragment="content" class="api-app">
+    <!-- Page Header with gradient background -->
+    <div class="page-header">
+        <div class="container">
+            <h1 class="mb-2">
+                <i class="fas fa-code-branch me-2"></i>
+                Version History
+            </h1>
+            <p class="mb-0 opacity-75" th:text="${api.name}">API Name</p>
+        </div>
+    </div>
+
     <div class="container mt-4">
+        <!-- Navigation and Actions -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 th:text="'Version History - ' + ${api.name}">Version History</h2>
-            <a th:href="@{/api/{id}(id=${api.id})}" class="btn btn-secondary">Back to API</a>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item">
+                        <a href="/" class="text-decoration-none">
+                            <i class="fas fa-home me-1"></i>APIs
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a th:href="@{/apis/{id}(id=${api.id})}" class="text-decoration-none" th:text="${api.name}">API Name</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Version History</li>
+                </ol>
+            </nav>
+
+            <div class="btn-group">
+                <a th:href="@{/apis/{id}(id=${api.id})}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to API
+                </a>
+                <a th:href="@{/apis/{id}/edit(id=${api.id})}" class="btn btn-outline-primary">
+                    <i class="fas fa-edit me-1"></i>Edit API
+                </a>
+            </div>
         </div>
 
         <div class="row">
             <div class="col-12">
-                <div class="card">
+                <!-- Empty State -->
+                <div th:if="${#lists.isEmpty(versions)}" class="api-card">
                     <div class="card-body">
-                        <div th:if="${#lists.isEmpty(versions)}" class="text-center py-4">
-                            <p class="text-muted">No version history available.</p>
+                        <div class="empty-state">
+                            <i class="fas fa-history fa-3x mb-3 text-muted"></i>
+                            <h4>No Version History Available</h4>
+                            <p class="text-muted">This API doesn't have any version history yet.</p>
+                            <a th:href="@{/apis/{id}(id=${api.id})}" class="btn btn-primary">
+                                <i class="fas fa-eye me-2"></i>View Current API
+                            </a>
                         </div>
+                    </div>
+                </div>
 
-                        <div th:unless="${#lists.isEmpty(versions)}">
-                            <div th:each="version : ${versions}" class="border-bottom pb-3 mb-3">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <h5 class="mb-1">
-                                            Version <span th:text="${version.versionNumber}">1.0.0</span>
-                                            <span th:if="${version.isCurrent}" class="badge bg-success ms-2">Current</span>
-                                        </h5>
-                                        <p class="text-muted mb-2" th:text="${#temporals.format(version.createdDate, 'MMM dd, yyyy HH:mm')}">Date</p>
-                                        <p th:if="${version.changeSummary}" th:text="${version.changeSummary}" class="mb-0">Changes</p>
+                <!-- Version History Content -->
+                <div th:unless="${#lists.isEmpty(versions)}">
+                    <!-- Summary Card -->
+                    <div class="api-card mb-4">
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <div class="d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-code-branch fa-2x text-primary me-3"></i>
+                                        <div>
+                                            <h4 class="mb-0" th:text="${#lists.size(versions)}">0</h4>
+                                            <small class="text-muted">Total Versions</small>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <a th:href="@{/api/{id}/version/{versionId}(id=${api.id}, versionId=${version.id})}"
-                                           class="btn btn-sm btn-outline-primary">View</a>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-clock fa-2x text-success me-3"></i>
+                                        <div>
+                                            <h4 class="mb-0" th:text="${versions[0].versionNumber}">1.0.0</h4>
+                                            <small class="text-muted">Latest Version</small>
+                                        </div>
                                     </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-calendar fa-2x text-info me-3"></i>
+                                        <div>
+                                            <h4 class="mb-0" th:text="${#temporals.format(versions[0].createdDate, 'MMM dd')}">Date</h4>
+                                            <small class="text-muted">Last Updated</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Version Timeline -->
+                    <div class="api-card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="fas fa-history me-2"></i>Version Timeline
+                            </h5>
+                            <span class="badge bg-light text-dark" th:text="${#lists.size(versions)} + ' versions'">X versions</span>
+                        </div>
+                        <div class="card-body">
+                            <!-- Version Items -->
+                            <div class="timeline">
+                                <div th:each="version,iterStat : ${versions}" class="timeline-item">
+                                    <div class="timeline-marker" th:classappend="${version.isCurrent} ? 'timeline-marker-current' : 'timeline-marker-past'">
+                                        <i class="fas fa-code-branch" th:classappend="${version.isCurrent} ? 'text-success' : 'text-muted'"></i>
+                                    </div>
+
+                                    <div class="timeline-content">
+                                        <div class="notification-card" th:classappend="${version.isCurrent} ? 'border-success' : ''">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <div class="d-flex align-items-center">
+                                                        <h6 class="mb-0 me-2">
+                                                            Version <span th:text="${version.versionNumber}" class="fw-bold">1.0.0</span>
+                                                        </h6>
+                                                        <span th:if="${version.isCurrent}" class="badge bg-success">
+                                                            <i class="fas fa-star me-1"></i>Current
+                                                        </span>
+                                                        <span th:unless="${version.isCurrent}" class="badge bg-secondary">
+                                                            Previous
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a th:href="@{/apis/{id}/version/{versionId}(id=${api.id}, versionId=${version.id})}"
+                                                           class="btn btn-outline-primary btn-sm" title="View this version">
+                                                            <i class="fas fa-eye me-1"></i>View
+                                                        </a>
+                                                        <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle dropdown-toggle-split"
+                                                                data-bs-toggle="dropdown" aria-expanded="false">
+                                                            <span class="visually-hidden">Toggle Dropdown</span>
+                                                        </button>
+                                                        <ul class="dropdown-menu">
+                                                            <li>
+                                                                <a class="dropdown-item" th:href="@{/apis/{id}/version/{versionId}/raw(id=${api.id}, versionId=${version.id})}" target="_blank">
+                                                                    <i class="fas fa-file-code me-2"></i>View Raw JSON
+                                                                </a>
+                                                            </li>
+                                                            <li th:unless="${version.isCurrent}">
+                                                                <a class="dropdown-item" href="#" onclick="compareVersions()">
+                                                                    <i class="fas fa-code-compare me-2"></i>Compare with Current
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-md-8">
+                                                        <p th:if="${version.changeSummary}"
+                                                           th:text="${version.changeSummary}"
+                                                           class="text-muted mb-0">
+                                                            Changes summary...
+                                                        </p>
+                                                        <p th:unless="${version.changeSummary}"
+                                                           class="text-muted mb-0 fst-italic">
+                                                            No change summary available
+                                                        </p>
+                                                    </div>
+                                                    <div class="col-md-4 text-end">
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-calendar me-1"></i>
+                                                            <span th:text="${#temporals.format(version.createdDate, 'MMM dd, yyyy HH:mm')}">Date</span>
+                                                        </small>
+                                                        <br>
+                                                        <small class="text-muted" th:if="${version.createdBy}">
+                                                            <i class="fas fa-user me-1"></i>
+                                                            <span th:text="${version.createdBy}">User</span>
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Timeline connector line (except for last item) -->
+                                    <div th:unless="${iterStat.last}" class="timeline-connector"></div>
                                 </div>
                             </div>
                         </div>
@@ -42,6 +190,108 @@
             </div>
         </div>
     </div>
+
+    <style>
+        /* Timeline Styles */
+        .timeline {
+            position: relative;
+            padding-left: 0;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 3rem;
+            margin-bottom: 2rem;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            left: 0;
+            top: 0.5rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+        }
+
+        .timeline-marker-current {
+            border-color: #28a745 !important;
+            background: #f8fff9 !important;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+        }
+
+        .timeline-marker-past {
+            border-color: #6c757d !important;
+            background: #f8f9fa !important;
+        }
+
+        .timeline-content {
+            position: relative;
+        }
+
+        .timeline-connector {
+            position: absolute;
+            left: 1.25rem;
+            top: 2.5rem;
+            bottom: -2rem;
+            width: 2px;
+            background: linear-gradient(to bottom, #dee2e6, rgba(222, 226, 230, 0.3));
+            z-index: 1;
+        }
+
+        .timeline-item:last-child .timeline-connector {
+            display: none;
+        }
+
+        /* Responsive timeline */
+        @media (max-width: 768px) {
+            .timeline-item {
+                padding-left: 2.5rem;
+            }
+
+            .timeline-marker {
+                width: 2rem;
+                height: 2rem;
+                left: 0;
+            }
+
+            .timeline-connector {
+                left: 1rem;
+            }
+        }
+    </style>
+
+    <script>
+        function compareVersions() {
+            // Placeholder for version comparison functionality
+            alert('Version comparison feature coming soon!');
+        }
+
+        // Add smooth scrolling and enhanced interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add fade-in animation to timeline items
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            });
+
+            document.querySelectorAll('.timeline-item').forEach((item, index) => {
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(20px)';
+                item.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+                observer.observe(item);
+            });
+        });
+    </script>
 </div>
 </body>
 </html>

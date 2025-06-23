@@ -56,49 +56,6 @@ public class ApiChangeNotification {
         this.newVersion = newVersion;
     }
 
-    // Static factory methods for common notification types
-    public static ApiChangeNotification newVersionNotification(ApiDocumentation api,
-                                                               String oldVersion, String newVersion,
-                                                               String changeSummary) {
-        return new ApiChangeNotification(
-                api,
-                ChangeType.NEW_VERSION,
-                changeSummary,
-                oldVersion,
-                newVersion
-        );
-    }
-
-    public static ApiChangeNotification endpointAddedNotification(ApiDocumentation api,
-                                                                  String endpointPath) {
-        return new ApiChangeNotification(
-                api,
-                ChangeType.ENDPOINT_ADDED,
-                "New endpoint added: " + endpointPath
-        );
-    }
-
-    public static ApiChangeNotification endpointRemovedNotification(ApiDocumentation api,
-                                                                    String endpointPath) {
-        return new ApiChangeNotification(
-                api,
-                ChangeType.ENDPOINT_REMOVED,
-                "Endpoint removed: " + endpointPath
-        );
-    }
-
-    public static ApiChangeNotification breakingChangeNotification(ApiDocumentation api,
-                                                                   String changeDescription,
-                                                                   String oldVersion, String newVersion) {
-        return new ApiChangeNotification(
-                api,
-                ChangeType.BREAKING_CHANGE,
-                changeDescription,
-                oldVersion,
-                newVersion
-        );
-    }
-
     // Getters and setters...
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

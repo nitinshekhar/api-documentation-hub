@@ -294,16 +294,7 @@ public class ApiDocumentationController {
             currentVersionData.put("isLatest", true);
             versionData.add(currentVersionData);
 
-            /* List<Map<String, Object>> versionData = versions.stream()
-                    .map(version -> {
-                        Map<String, Object> data = new HashMap<>();
-                        data.put("versionNumber", version.getVersionNumber());
-                        data.put("createdAt", version.getCreatedDate());
-                        data.put("isLatest", versions.indexOf(version) == 0);  //First One is Latest
-                        return data;
-                    })
-                    .collect(Collectors.toList());*/
-// Add historical versions (if any exist)
+            // Add historical versions (if any exist)
             versions.stream()
                     .filter(version -> !version.getVersionNumber().equals(api.getVersion())) // Avoid duplicates
                     .sorted((v1, v2) -> v2.getCreatedDate().compareTo(v1.getCreatedDate())) // Latest first

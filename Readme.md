@@ -34,8 +34,8 @@ Project Structure
 4. Service: ApiDocumentationService.java - Business logic
 5. Controller: ApiDocumentationController.java - Web endpoints
 6. ScheduledTasks - Scheduled Task for Auto Updates for URL based API's
-6. Resources - Static Style css, configurations and templates
-7. Templates: Thymeleaf templates for the web interface.
+7. Resources - Static Style css, configurations and templates
+8. Templates: Thymeleaf templates for the web interface.
    a. layout.html
    b. index.html
    c. add-api.html

@@ -1,82 +1,52 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::main})}">
-<main>
-    <div class="d-flex justify-content-between align-items-start mb-4">
-        <div>
-            <h1>
-                <i class="fas fa-code me-2 text-primary"></i>
-                <span th:text="${api.name}">API Name</span>
-            </h1>
-            <!-- Dynamic description that updates based on version -->
-            <p class="text-muted mb-2" id="apiDescription" th:text="${versionData != null ? versionData.description : api.description}" th:if="${versionData != null ? versionData.description : api.description}">API Description</p>
-
-            <div class="small text-muted">
-                <span class="me-3">
-                    <i class="fas fa-user me-1"></i>
-                    <span th:text="${api.updatedBy ?: 'Unknown'}">Creator</span>
-                </span>
-                <span class="me-3">
-                    <i class="fas fa-sync me-1"></i>
-                    <!-- Show version-specific update date -->
-                    <span id="updatedDate" th:text="${#temporals.format(versionData != null ? versionData.updatedAt : api.updatedAt, 'MMM dd, yyyy HH:mm')}">Updated</span>
-                </span>
-                <span class="badge bg-info">
-                    <span th:text="${api.sourceType.name()}">Source Type</span>
-                </span>
-            </div>
-        </div>
-
-        <div class="btn-group">
-            <a href="/apis" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-1"></i>Back to List
-            </a>
-
-            <div class="btn-group" role="group">
-                <button type="button" class="btn btn-outline-primary dropdown-toggle"
-                        data-bs-toggle="dropdown">
-                    <i class="fas fa-cog me-1"></i>Actions
-                </button>
-                <ul class="dropdown-menu">
-                    <li>
-                        <a class="dropdown-item" th:href="@{/apis/{id}/raw(id=${api.id})}" target="_blank">
-                            <i class="fas fa-file-code me-2"></i>View Raw JSON
+<main class="api-app">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-1">
+                        <i class="fas fa-code me-2"></i>
+                        <span th:text="${api.name}">API Name</span>
+                    </h1>
+                    <p class="mb-0 opacity-75" id="apiDescription"
+                       th:text="${versionData != null ? versionData.description : api.description}"
+                       th:if="${versionData != null ? versionData.description : api.description}">
+                        API Description
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <div class="btn-group">
+                        <a href="/apis" class="btn btn-light">
+                            <i class="fas fa-arrow-left me-1"></i>Back to List
                         </a>
-                    </li>
-                    <li th:if="${api.sourceType.name() == 'EXTERNAL_URL'}">
-                        <form th:action="@{/api/{id}/refresh(id=${api.id})}" method="post" style="display: inline;">
-                            <button type="submit" class="dropdown-item">
-                                <i class="fas fa-sync me-2"></i>Refresh from URL
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-light dropdown-toggle"
+                                    data-bs-toggle="dropdown">
+                                <i class="fas fa-cog me-1"></i>Actions
                             </button>
-                        </form>
-                    </li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li>
-                        <button class="dropdown-item text-danger" onclick="confirmDelete()"
-                                th:data-id="${api.id}" th:data-name="${api.name}">
-                            <i class="fas fa-trash me-2"></i>Delete API
-                        </button>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- Version Selector - Load versions via AJAX -->
-    <div class="row mb-4" id="versionSelectorContainer" style="display: none;">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-body py-2">
-                    <div class="d-flex align-items-center">
-                        <label class="form-label mb-0 me-3">
-                            <i class="fas fa-code-branch me-1"></i>
-                            <strong>Version:</strong>
-                        </label>
-                        <select class="form-select form-select-sm" id="versionSelector" style="width: auto; min-width: 200px;">
-                            <option value="">Loading versions...</option>
-                        </select>
-                        <div class="ms-3" id="versionBadges">
-                            <span class="badge bg-success" th:if="${currentVersion == null}">Latest</span>
-                            <span class="badge bg-warning" th:if="${currentVersion != null}">Previous Version</span>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" th:href="@{/apis/{id}/raw(id=${api.id})}" target="_blank">
+                                        <i class="fas fa-file-code me-2"></i>View Raw JSON
+                                    </a>
+                                </li>
+                                <li th:if="${api.sourceType.name() == 'EXTERNAL_URL'}">
+                                    <form th:action="@{/api/{id}/refresh(id=${api.id})}" method="post" style="display: inline;">
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="fas fa-sync me-2"></i>Refresh from URL
+                                        </button>
+                                    </form>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <button class="dropdown-item text-danger" onclick="confirmDelete()"
+                                            th:data-id="${api.id}" th:data-name="${api.name}">
+                                        <i class="fas fa-trash me-2"></i>Delete API
+                                    </button>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -84,28 +54,117 @@
         </div>
     </div>
 
-    <div th:if="${api.sourceUrl}" class="alert alert-info">
-        <i class="fas fa-link me-2"></i>
-        <strong>Source URL:</strong>
-        <a th:href="${api.sourceUrl}" target="_blank" th:text="${api.sourceUrl}">URL</a>
-    </div>
-
-    <!-- Swagger UI Container -->
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0">
-                <i class="fas fa-book-open me-2"></i>API Documentation
-                <small class="text-muted ms-2" th:text="'(Version ' + ${currentVersion != null ? currentVersion : api.version} + ')'"></small>
-            </h5>
-        </div>
-        <div class="card-body p-0">
-            <div id="swagger-ui-loading" class="text-center p-4">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
+    <div class="container">
+        <!-- API Metadata Card -->
+        <div class="card api-card mb-4">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="d-flex flex-wrap gap-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-user text-muted me-2"></i>
+                                <span class="text-muted">Created by:</span>
+                                <span class="ms-1 fw-medium" th:text="${api.updatedBy ?: 'Unknown'}">Creator</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-calendar text-muted me-2"></i>
+                                <span class="text-muted">Updated:</span>
+                                <span class="ms-1" id="updatedDate"
+                                      th:text="${#temporals.format(versionData != null ? versionData.updatedAt : api.updatedAt, 'MMM dd, yyyy HH:mm')}">
+                                    Updated
+                                </span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-tag text-muted me-2"></i>
+                                <span class="badge bg-info">
+                                    <span th:text="${api.sourceType.name()}">Source Type</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <div class="text-muted small">
+                            <i class="fas fa-code-branch me-1"></i>
+                            Version <span th:text="${currentVersion != null ? currentVersion : api.version}">1.0.0</span>
+                        </div>
+                    </div>
                 </div>
-                <p class="mt-2">Loading API documentation...</p>
             </div>
-            <div id="swagger-ui"></div>
+        </div>
+
+        <!-- Version Selector -->
+        <div class="row mb-4" id="versionSelectorContainer" style="display: none;">
+            <div class="col-lg-8">
+                <div class="card api-card">
+                    <div class="card-body py-3">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <label class="form-label mb-0 me-3">
+                                        <i class="fas fa-code-branch me-1 text-primary"></i>
+                                        <strong>Version:</strong>
+                                    </label>
+                                    <select class="form-select form-select-sm" id="versionSelector" style="width: auto; min-width: 200px;">
+                                        <option value="">Loading versions...</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <div id="versionBadges">
+                                    <span class="badge bg-success" th:if="${currentVersion == null}">
+                                        <i class="fas fa-star me-1"></i>Latest
+                                    </span>
+                                    <span class="badge bg-warning" th:if="${currentVersion != null}">
+                                        <i class="fas fa-history me-1"></i>Previous Version
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Source URL Alert -->
+        <div th:if="${api.sourceUrl}" class="alert alert-info mb-4">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-link me-2"></i>
+                <div>
+                    <strong>Source URL:</strong>
+                    <a th:href="${api.sourceUrl}" target="_blank" th:text="${api.sourceUrl}" class="ms-2">URL</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Swagger UI Container -->
+        <div class="card api-card">
+            <div class="card-header bg-light">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0">
+                        <i class="fas fa-book-open me-2 text-primary"></i>API Documentation
+                        <small class="text-muted ms-2" th:text="'(Version ' + ${currentVersion != null ? currentVersion : api.version} + ')'">
+                            (Version 1.0.0)
+                        </small>
+                    </h5>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="toggleFullscreen()" id="fullscreenBtn">
+                            <i class="fas fa-expand me-1"></i>Fullscreen
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="downloadSpec()" id="downloadBtn">
+                            <i class="fas fa-download me-1"></i>Download
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0" id="swaggerContainer">
+                <div id="swagger-ui-loading" class="text-center p-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Loading API documentation...</p>
+                </div>
+                <div id="swagger-ui"></div>
+            </div>
         </div>
     </div>
 
@@ -114,17 +173,26 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Confirm Delete</h5>
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle text-danger me-2"></i>Confirm Delete
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Are you sure you want to delete the API documentation for <strong th:text="${api.name}"></strong>?</p>
-                    <p class="text-muted small">This action cannot be undone.</p>
+                    <p>Are you sure you want to delete the API documentation for <strong th:text="${api.name}">API Name</strong>?</p>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Warning:</strong> This action cannot be undone and will delete all versions of this API.
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Cancel
+                    </button>
                     <form th:action="@{/apis/{id}/delete(id=${api.id})}" method="post" style="display: inline;">
-                        <button type="submit" class="btn btn-danger">Delete</button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-1"></i>Delete
+                        </button>
                     </form>
                 </div>
             </div>
@@ -140,11 +208,12 @@
         // Get API ID from Thymeleaf
         const apiId = /*[[${api.id}]]*/ '';
         const currentVersionId = /*[[${currentVersion}]]*/ null;
+        let swaggerSpec = null;
+        let isFullscreen = false;
 
         // Wait for DOM and scripts to load
         document.addEventListener('DOMContentLoaded', function() {
             loadVersions();
-
             // Add a small delay to ensure scripts are fully loaded
             setTimeout(function() {
                 initializeSwaggerUI();
@@ -152,16 +221,14 @@
         });
 
         function loadVersions() {
-            console.log('Loading versions for API ID:',apiId);
-            // Load versions from JSON API endpoint
+            console.log('Loading versions for API ID:', apiId);
             fetch(`/api/apis/${apiId}/versions`, {
                 headers: {
                     'Accept': 'application/json'
-                    }
+                }
             })
             .then(response => {
                 console.log('Response status:', response.status);
-
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -169,21 +236,16 @@
             })
             .then(versions => {
                 console.log('Loaded versions:', versions);
-
                 const versionSelector = document.getElementById('versionSelector');
                 const versionContainer = document.getElementById('versionSelectorContainer');
 
                 if (versions && versions.length > 1) {
-                    // Clear existing options
                     versionSelector.innerHTML = '';
-
-                    // Process versions - first one should be latest
                     versions.forEach((version, index) => {
                         const option = document.createElement('option');
                         if (index === 0) {
-                            // Latest version
                             option.value = '';
-                            option.textContent = 'Latest Version (' + version.versionNumber + ')';
+                            option.textContent = `Latest Version (${version.versionNumber})`;
                             option.selected = currentVersionId === null;
                         } else {
                             option.value = version.versionNumber;
@@ -193,22 +255,18 @@
                        versionSelector.appendChild(option);
                     });
 
-                    // Show version selector and add change handler
                     versionContainer.style.display = 'block';
                     versionSelector.addEventListener('change', handleVersionChange);
                     console.log('Version selector populated with', versions.length, 'versions');
                 } else {
                     console.log('Only one version available, hiding selector');
-                    // Hide version selector if only one version exists
                     versionContainer.style.display = 'none';
                 }
             })
             .catch(error => {
                 console.error('Error loading versions:', error);
-                // Show error message in version selector
                 const versionSelector = document.getElementById('versionSelector');
                 versionSelector.innerHTML = '<option value="">Error loading versions</option>';
-                // Still hide the container on error, but log for debugging
                 document.getElementById('versionSelectorContainer').style.display = 'none';
             });
         }
@@ -217,13 +275,12 @@
             const versionSelector = document.getElementById('versionSelector');
             const selectedVersion = versionSelector.value;
             console.log('Version changed to:', selectedVersion, 'Current version:', currentVersionId);
+
             if (selectedVersion === '' && currentVersionId !== null) {
-                // Navigate to latest version
                 console.log('Navigating to latest version');
                 showLoadingState();
                 window.location.href = `/apis/${apiId}`;
             } else if (selectedVersion !== '' && currentVersionId !== selectedVersion) {
-                // Navigate to specific version
                 console.log('Navigating to version:', selectedVersion);
                 showLoadingState();
                 window.location.href = `/apis/${apiId}/version/${selectedVersion}`;
@@ -231,12 +288,11 @@
         }
 
         function showLoadingState() {
-            // Disable version selector
             const versionSelector = document.getElementById('versionSelector');
             if (versionSelector) {
                 versionSelector.disabled = true;
             }
-            // Show loading state
+
             const swaggerContainer = document.getElementById('swagger-ui');
             const loadingElement = document.getElementById('swagger-ui-loading');
 
@@ -249,14 +305,12 @@
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
-                    <p class="mt-2">Switching version...</p>
+                    <p class="mt-3 text-muted">Switching version...</p>
                 `;
             }
         }
 
-        // Function to update page content when version changes
         function updateVersionContent(versionData) {
-            // Update description
             const descriptionElement = document.getElementById('apiDescription');
             if (descriptionElement && versionData.description) {
                 descriptionElement.textContent = versionData.description;
@@ -265,7 +319,6 @@
                 descriptionElement.style.display = 'none';
             }
 
-            // Update version-specific updated date
             const updatedDateElement = document.getElementById('updatedDate');
             if (updatedDateElement && versionData.updatedAt) {
                 const formattedDate = new Date(versionData.updatedAt).toLocaleDateString('en-US', {
@@ -277,8 +330,6 @@
                 });
                 updatedDateElement.textContent = formattedDate;
             }
-
-            // Note: createdDate stays the same as it represents API creation, not version creation
         }
 
         function initializeSwaggerUI() {
@@ -286,14 +337,11 @@
             const swaggerElement = document.getElementById('swagger-ui');
 
             try {
-                // Check if SwaggerUIBundle is available
                 if (typeof SwaggerUIBundle === 'undefined') {
                     throw new Error('SwaggerUIBundle is not defined. Swagger UI scripts may not have loaded properly.');
                 }
 
-                // Get the spec from Thymeleaf
                 const spec = /*[[${api.swaggerContent}]]*/ {};
-
                 console.log('Raw spec from server:', spec);
 
                 let parsedSpec;
@@ -309,12 +357,13 @@
 
                 console.log('Parsed spec:', parsedSpec);
 
-                // Validate that we have a valid OpenAPI spec
                 if (!parsedSpec || (!parsedSpec.swagger && !parsedSpec.openapi)) {
                     throw new Error('Invalid OpenAPI/Swagger specification - missing version field');
                 }
 
-                // Update page content with version-specific information if available
+                // Store spec for download functionality
+                swaggerSpec = parsedSpec;
+
                 if (parsedSpec.info && parsedSpec.info.description) {
                     const descriptionElement = document.getElementById('apiDescription');
                     if (descriptionElement) {
@@ -323,10 +372,8 @@
                     }
                 }
 
-                // Hide loading indicator
                 loadingElement.style.display = 'none';
 
-                // Initialize Swagger UI
                 const ui = SwaggerUIBundle({
                     spec: parsedSpec,
                     dom_id: '#swagger-ui',
@@ -364,8 +411,8 @@
             loadingElement.style.display = 'none';
 
             swaggerElement.innerHTML =
-                '<div class="alert alert-danger m-3">' +
-                '<h4>' + title + '</h4>' +
+                '<div class="alert alert-danger m-4">' +
+                '<h4><i class="fas fa-exclamation-triangle me-2"></i>' + title + '</h4>' +
                 '<p>Invalid Swagger/OpenAPI specification format.</p>' +
                 '<details><summary>Error Details</summary><pre>' +
                 (typeof details === 'string' ? details : JSON.stringify(details, null, 2)) +
@@ -376,6 +423,52 @@
         function confirmDelete() {
             new bootstrap.Modal(document.getElementById('deleteModal')).show();
         }
+
+        function toggleFullscreen() {
+            const container = document.getElementById('swaggerContainer');
+            const btn = document.getElementById('fullscreenBtn');
+
+            if (!isFullscreen) {
+                container.style.position = 'fixed';
+                container.style.top = '0';
+                container.style.left = '0';
+                container.style.width = '100vw';
+                container.style.height = '100vh';
+                container.style.zIndex = '9999';
+                container.style.backgroundColor = 'white';
+                btn.innerHTML = '<i class="fas fa-compress me-1"></i>Exit Fullscreen';
+                isFullscreen = true;
+            } else {
+                container.style.position = '';
+                container.style.top = '';
+                container.style.left = '';
+                container.style.width = '';
+                container.style.height = '';
+                container.style.zIndex = '';
+                container.style.backgroundColor = '';
+                btn.innerHTML = '<i class="fas fa-expand me-1"></i>Fullscreen';
+                isFullscreen = false;
+            }
+        }
+
+        function downloadSpec() {
+            if (swaggerSpec) {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(swaggerSpec, null, 2));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", `${swaggerSpec.info?.title || 'api'}-spec.json`);
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+            }
+        }
+
+        // Handle escape key for fullscreen
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && isFullscreen) {
+                toggleFullscreen();
+            }
+        });
     </script>
 </main>
 </html>

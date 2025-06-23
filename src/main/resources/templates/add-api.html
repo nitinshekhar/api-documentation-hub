@@ -1,115 +1,177 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::main})}">
-<main>
-    <div class="row justify-content-center">
-        <div class="col-md-8">
+<main class="api-app">
+    <!-- Page Header with gradient background -->
+    <div class="page-header">
+        <div class="container">
             <h1><i class="fas fa-plus me-2"></i>Add API Documentation</h1>
+            <p class="mb-0">Upload your Swagger/OpenAPI documentation from file or URL</p>
+        </div>
+    </div>
 
-            <div class="card">
-                <div class="card-body">
-                    <ul class="nav nav-tabs" id="addApiTabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="file-tab" data-bs-toggle="tab"
-                                    data-bs-target="#file-pane" type="button" role="tab">
-                                <i class="fas fa-file-upload me-2"></i>Upload File
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="url-tab" data-bs-toggle="tab"
-                                    data-bs-target="#url-pane" type="button" role="tab">
-                                <i class="fas fa-link me-2"></i>From URL
-                            </button>
-                        </li>
-                    </ul>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card api-card">
+                    <div class="card-body">
+                        <ul class="nav nav-tabs" id="addApiTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="file-tab" data-bs-toggle="tab"
+                                        data-bs-target="#file-pane" type="button" role="tab">
+                                    <i class="fas fa-file-upload me-2"></i>Upload File
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="url-tab" data-bs-toggle="tab"
+                                        data-bs-target="#url-pane" type="button" role="tab">
+                                    <i class="fas fa-link me-2"></i>From URL
+                                </button>
+                            </li>
+                        </ul>
 
-                    <div class="tab-content mt-3">
-                        <!-- File Upload Tab -->
-                        <div class="tab-pane fade show active" id="file-pane" role="tabpanel">
-                            <form action="/apis/upload-file" method="post" enctype="multipart/form-data">
-                                <div class="mb-3">
-                                    <label for="fileName" class="form-label">API Name *</label>
-                                    <input type="text" class="form-control" id="fileName" name="name" required>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="fileDescription" class="form-label">Description</label>
-                                    <textarea class="form-control" id="fileDescription" name="description" rows="3"></textarea>
-                                </div>
-
-                                <div class="row">
-                                    <!--<div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="fileVersion" class="form-label">Version *</label>
-                                            <input type="text" class="form-control" id="fileVersion" name="version"
-                                                   value="1.0.0" required>
+                        <div class="tab-content mt-4">
+                            <!-- File Upload Tab -->
+                            <div class="tab-pane fade show active" id="file-pane" role="tabpanel">
+                                <form action="/apis/upload-file" method="post" enctype="multipart/form-data" id="fileUploadForm">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="fileName" class="form-label">
+                                                    <i class="fas fa-tag me-1"></i>API Name *
+                                                </label>
+                                                <input type="text" class="form-control" id="fileName" name="name" required
+                                                       placeholder="Enter API name">
+                                            </div>
                                         </div>
-                                    </div> -->
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="fileCreatedBy" class="form-label">Created By</label>
-                                            <input type="text" class="form-control" id="fileCreatedBy" name="createdBy">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="fileCreatedBy" class="form-label">
+                                                    <i class="fas fa-user me-1"></i>Created By
+                                                </label>
+                                                <input type="text" class="form-control" id="fileCreatedBy" name="createdBy"
+                                                       placeholder="Your name">
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div class="mb-3">
-                                    <label for="file" class="form-label">Swagger/OpenAPI File *</label>
-                                    <input type="file" class="form-control" id="file" name="file"
-                                           accept=".json,.yaml,.yml" required>
-                                    <div class="form-text">Upload JSON or YAML file (max 10MB)</div>
-                                </div>
+                                    <div class="mb-3">
+                                        <label for="fileDescription" class="form-label">
+                                            <i class="fas fa-align-left me-1"></i>Description
+                                        </label>
+                                        <textarea class="form-control" id="fileDescription" name="description" rows="3"
+                                                  placeholder="Brief description of the API"></textarea>
+                                    </div>
 
-                                <div class="d-flex gap-2">
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-upload me-2"></i>Upload API
-                                    </button>
-                                    <a href="/" class="btn btn-secondary">Cancel</a>
-                                </div>
-                            </form>
+                                    <div class="mb-4">
+                                        <label for="file" class="form-label">
+                                            <i class="fas fa-file-code me-1"></i>Swagger/OpenAPI File *
+                                        </label>
+                                        <input type="file" class="form-control" id="file" name="file"
+                                               accept=".json,.yaml,.yml" required>
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Upload JSON or YAML file (max 10MB). Supported formats: .json, .yaml, .yml
+                                        </div>
+                                    </div>
+
+                                    <!-- File validation feedback -->
+                                    <div id="fileValidationMessage" class="alert" style="display: none;"></div>
+
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary" id="uploadBtn">
+                                            <i class="fas fa-upload me-2"></i>Upload API
+                                        </button>
+                                        <a href="/" class="btn btn-secondary">
+                                            <i class="fas fa-times me-2"></i>Cancel
+                                        </a>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- URL Tab -->
+                            <div class="tab-pane fade" id="url-pane" role="tabpanel">
+                                <form action="/apis/upload-url" method="post" id="urlUploadForm">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="urlName" class="form-label">
+                                                    <i class="fas fa-tag me-1"></i>API Name *
+                                                </label>
+                                                <input type="text" class="form-control" id="urlName" name="name" required
+                                                       placeholder="Enter API name">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="urlCreatedBy" class="form-label">
+                                                    <i class="fas fa-user me-1"></i>Created By
+                                                </label>
+                                                <input type="text" class="form-control" id="urlCreatedBy" name="createdBy"
+                                                       placeholder="Your name">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="urlDescription" class="form-label">
+                                            <i class="fas fa-align-left me-1"></i>Description
+                                        </label>
+                                        <textarea class="form-control" id="urlDescription" name="description" rows="3"
+                                                  placeholder="Brief description of the API"></textarea>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="url" class="form-label">
+                                            <i class="fas fa-link me-1"></i>Swagger/OpenAPI URL *
+                                        </label>
+                                        <input type="url" class="form-control" id="url" name="url" required
+                                               placeholder="https://api.example.com/swagger.json">
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            URL to Swagger JSON or YAML file. Must be publicly accessible.
+                                        </div>
+                                    </div>
+
+                                    <!-- URL validation feedback -->
+                                    <div id="urlValidationMessage" class="alert" style="display: none;"></div>
+
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary" id="urlBtn">
+                                            <i class="fas fa-download me-2"></i>Add from URL
+                                        </button>
+                                        <a href="/" class="btn btn-secondary">
+                                            <i class="fas fa-times me-2"></i>Cancel
+                                        </a>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
+                    </div>
+                </div>
 
-                        <!-- URL Tab -->
-                        <div class="tab-pane fade" id="url-pane" role="tabpanel">
-                            <form action="/apis/upload-url" method="post">
-                                <div class="mb-3">
-                                    <label for="urlName" class="form-label">API Name *</label>
-                                    <input type="text" class="form-control" id="urlName" name="name" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="urlDescription" class="form-label">Description</label>
-                                    <textarea class="form-control" id="urlDescription" name="description" rows="3"></textarea>
-                                </div>
-
-                                <div class="row">
-                                    <!--<div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="urlVersion" class="form-label">Version *</label>
-                                            <input type="text" class="form-control" id="urlVersion" name="version"
-                                                   value="1.0.0" required>
-                                        </div>
-                                    </div> -->
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="urlCreatedBy" class="form-label">Created By</label>
-                                            <input type="text" class="form-control" id="urlCreatedBy" name="createdBy">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="url" class="form-label">Swagger/OpenAPI URL *</label>
-                                    <input type="url" class="form-control" id="url" name="url" required
-                                           placeholder="https://api.example.com/swagger.json">
-                                    <div class="form-text">URL to Swagger JSON or YAML file</div>
-                                </div>
-
-                                <div class="d-flex gap-2">
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-download me-2"></i>Add from URL
-                                    </button>
-                                    <a href="/" class="btn btn-secondary">Cancel</a>
-                                </div>
-                            </form>
+                <!-- Help Section -->
+                <div class="card api-card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-question-circle me-2"></i>Need Help?
+                        </h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-file-upload me-1"></i>File Upload</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check text-success me-1"></i>Supports JSON and YAML formats</li>
+                                    <li><i class="fas fa-check text-success me-1"></i>Maximum file size: 10MB</li>
+                                    <li><i class="fas fa-check text-success me-1"></i>OpenAPI 3.0+ and Swagger 2.0</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-link me-1"></i>URL Import</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check text-success me-1"></i>Must be publicly accessible</li>
+                                    <li><i class="fas fa-check text-success me-1"></i>Validates content before import</li>
+                                    <li><i class="fas fa-check text-success me-1"></i>Supports HTTPS and HTTP</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -119,46 +181,98 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const urlForm = document.querySelector('form[action="/apis/upload-url"]');
+            // File validation
+            const fileInput = document.getElementById('file');
+            const fileValidationMessage = document.getElementById('fileValidationMessage');
+
+            fileInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const fileName = file.name.toLowerCase();
+                    const validExtensions = ['.json', '.yaml', '.yml'];
+                    const isValid = validExtensions.some(ext => fileName.endsWith(ext));
+
+                    if (!isValid) {
+                        showValidationMessage(fileValidationMessage, 'Please select a valid JSON or YAML file.', 'danger');
+                    } else if (file.size > 10 * 1024 * 1024) { // 10MB
+                        showValidationMessage(fileValidationMessage, 'File size must be less than 10MB.', 'danger');
+                    } else {
+                        showValidationMessage(fileValidationMessage, 'File looks good!', 'success');
+                    }
+                }
+            });
+
+            // URL form validation
+            const urlForm = document.getElementById('urlUploadForm');
+            const urlValidationMessage = document.getElementById('urlValidationMessage');
+            const urlBtn = document.getElementById('urlBtn');
+
             urlForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+
                 const urlInput = document.getElementById('url');
                 const url = urlInput.value.trim();
-                if (!url) return; // required field
 
-                // Show loading/disable button if you want
-                // Try to fetch the URL and check if it's JSON or YAML
-                event.preventDefault(); // Stop form for now
+                if (!url) return;
+
+                // Show loading state
+                const originalText = urlBtn.innerHTML;
+                urlBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Validating...';
+                urlBtn.disabled = true;
+
+                // Validate URL
                 fetch(url)
                     .then(response => {
-                        if (!response.ok) throw new Error('Network response was not ok');
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
                         const contentType = response.headers.get('content-type');
                         if (contentType && contentType.includes('json')) {
                             return response.json();
                         } else {
-                            return response.text(); // Could be YAML, just accept for now
+                            return response.text();
                         }
                     })
                     .then(data => {
-                        // Optionally, check if it's a valid OpenAPI/Swagger object
-                        // For JSON: check for 'openapi' or 'swagger' property
                         let isValid = false;
                         if (typeof data === 'object') {
                             isValid = data.openapi || data.swagger;
                         } else if (typeof data === 'string') {
                             isValid = data.includes('openapi:') || data.includes('swagger:');
                         }
+
                         if (!isValid) {
-                            alert('The file does not appear to be a valid OpenAPI/Swagger document.');
+                            showValidationMessage(urlValidationMessage,
+                                'The URL does not appear to contain valid OpenAPI/Swagger documentation.', 'danger');
+                            resetButton();
                             return;
                         }
-                        // If valid, submit the form
-                        urlForm.submit();
+
+                        showValidationMessage(urlValidationMessage,
+                            'Valid API documentation found! Submitting...', 'success');
+
+                        // Submit the form
+                        setTimeout(() => {
+                            urlForm.submit();
+                        }, 1000);
                     })
                     .catch(error => {
-                        alert('Could not fetch or parse the API documentation from the provided URL.\n' + error);
-                        // Optionally, re-enable button/loading
+                        showValidationMessage(urlValidationMessage,
+                            `Could not fetch API documentation: ${error.message}`, 'danger');
+                        resetButton();
                     });
+
+                function resetButton() {
+                    urlBtn.innerHTML = originalText;
+                    urlBtn.disabled = false;
+                }
             });
+
+            function showValidationMessage(element, message, type) {
+                element.className = `alert alert-${type}`;
+                element.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>${message}`;
+                element.style.display = 'block';
+            }
         });
     </script>
 
