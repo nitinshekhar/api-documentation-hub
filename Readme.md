@@ -48,7 +48,67 @@ Project Structure
    f. notification.html
    g. version-history.html
 
-Database : H2database.
+---
 
-To run the project 
-The project has a pom file that can be used to compile, build and run the project
+## Technologies Used
+
+*   **Spring Boot**: Framework for building the application.
+*   **Spring Data JPA**: For database interaction and ORM.
+*   **Thymeleaf**: Server-side Java template engine for web applications.
+*   **H2 Database**: In-memory relational database for development and testing.
+*   **SpringDoc OpenAPI UI**: For generating and serving Swagger UI.
+*   **Jackson Dataformat YAML**: For YAML processing.
+*   **SnakeYAML**: YAML parser and emitter.
+*   **Bootstrap 5**: Front-end framework for responsive design.
+*   **Maven**: Build automation tool.
+*   **Java 21**: Programming language.
+
+## Prerequisites
+
+*   **Java Development Kit (JDK) 21** or higher.
+*   **Maven 3.x** or higher.
+
+## Configuration
+
+The application can be configured using `application.properties` or `application.yml` files located in `src/main/resources`.
+
+*   **Server Port**: `server.port=8080` (default)
+*   **H2 Console**:
+    *   `spring.h2.console.enabled=true`
+    *   `spring.h2.console.path=/h2-console`
+*   **Swagger UI**:
+    *   `springdoc.api-docs.path=/api-docs`
+    *   `springdoc.swagger-ui.path=/swagger-ui.html`
+*   **Scheduled Updates**:
+    *   `app.scheduling.enabled=true` (enable/disable scheduled tasks)
+    *   `app.auto-update.interval=3600000` (interval in milliseconds, default 1 hour)
+*   **Notification Retention**:
+    *   `app.notification.retention-days=30` (number of days to retain notifications)
+*   **HTTP Client**:
+    *   `app.http.connection-timeout=10000` (connection timeout in milliseconds)
+    *   `app.http.read-timeout=30000` (read timeout in milliseconds)
+    *   `app.http.max-redirects=5` (maximum HTTP redirects)
+
+## Getting Started
+
+To run the project locally, follow these steps:
+
+1.  **Clone the repository**:
+    ```bash
+    git clone <repository_url>
+    cd api-documentation-hub
+    ```
+2.  **Build the project**:
+    ```bash
+    mvn clean install
+    ```
+3.  **Run the application**:
+    ```bash
+    mvn spring-boot:run
+    ```
+    The application will start on `http://localhost:8080` (or your configured port).
+
+4.  **Access the application**:
+    *   **Home Page**: `http://localhost:8080`
+    *   **Swagger UI**: `http://localhost:8080/swagger-ui.html`
+    *   **H2 Console**: `http://localhost:8080/h2-console` (JDBC URL: `jdbc:h2:mem:apihub`, Username: `sa`, Password: ` `)
