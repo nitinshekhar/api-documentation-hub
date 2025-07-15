@@ -26,22 +26,27 @@ Project Structure
 2. Model: JPA Entity for storing data
    a. ApiDocumentation.java - JPA entity for storing API metadata 
    b. ApiVersion.java - JPA entity for storing API Version data
-   c. ApiChangeNotification - JPA entity for api change notification
+   c. ApiChangeNotification.java - JPA entity for api change notification
+   d. ChangeType.java - Enum for change types
+   e. SourceType.java - Enum for source types
+   f. dto/UpdateApiRequest.java - DTO for updating API requests
 3. Repository: ApiDocumentationRepository.java - Data access layer
    a. ApiChangeNotificationRepository
    b. ApiDocumentationRepository
    c. ApiVersionRepository
 4. Service: ApiDocumentationService.java - Business logic
 5. Controller: ApiDocumentationController.java - Web endpoints
-6. ScheduledTasks - Scheduled Task for Auto Updates for URL based API's
-7. Resources - Static Style css, configurations and templates
+6. Config: SwaggerConfig.java - Swagger/OpenAPI configuration
+7. ScheduledTasks.java - Scheduled Task for Auto Updates for URL based API's
+8. Resources - Static Style css, configurations and templates
 8. Templates: Thymeleaf templates for the web interface.
    a. layout.html
    b. index.html
    c. add-api.html
    d. api-detail.html
-   e. Notification.html
-   f. version-history.html
+   e. edit-api.html
+   f. notification.html
+   g. version-history.html
 
 Database : H2database.
 
